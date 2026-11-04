@@ -1,0 +1,26 @@
+---
+ci_base_packages:
+  - curl
+  - wget
+  - git
+  - jq
+  - unzip
+  - zip
+  - make
+  - build-essential
+  - ca-certificates
+  - gnupg
+  - software-properties-common
+
+ci_python_packages:
+  - python3.12
+  - python3-pip
+  - python3-venv
+
+ci_node_major: "22"
+ci_vault_version: "1.18.0"
+
+ci_runner_user: "runner"
+ci_runner_dir: "/opt/actions-runner"
+ci_runner_version: "2.321.0"
+ci_runner_labels: "self-hosted,linux,intern-lab"

@@ -1,0 +1,6 @@
+---
+- name: Standardize Self-Hosted CI Runner Environment
+  hosts: runner
+  become: true
+  roles:
+    - ci_runner
