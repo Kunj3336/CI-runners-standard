@@ -1,0 +1,20 @@
+---
+- name: Verify installed tool binaries
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - "jq --version"
+    - "unzip -v"
+    - "python3.12 --version"
+    - "node --version"
+    - "npm --version"
+    - "vault version"
+    - "gh --version"
+    - "git --version"
+  register: verify_results
+  changed_when: false
+  become: false
+
+- name: Display verification summary
+  ansible.builtin.debug:
+    msg: "{{ item.stdout_lines[0] }}"
+  loop: "{{ verify_results.results }}"

@@ -1,3 +1,15 @@
 ---
 - name: Include base package tasks
   ansible.builtin.include_tasks: base.yml
+
+- name: Include Node.js installation
+  ansible.builtin.include_tasks: node.yml
+
+- name: Include Vault and GitHub CLI installation
+  ansible.builtin.include_tasks: tools.yml
+
+- name: Include GitHub Actions runner setup
+  ansible.builtin.include_tasks: runner.yml
+
+- name: Include tool verification
+  ansible.builtin.include_tasks: verify.yml

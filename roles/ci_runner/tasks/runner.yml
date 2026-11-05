@@ -1,0 +1,48 @@
+---
+- name: Create dedicated runner group
+  ansible.builtin.group:
+    name: "{{ ci_runner_user }}"
+    state: present
+  become: true
+
+- name: Create dedicated runner user
+  ansible.builtin.user:
+    name: "{{ ci_runner_user }}"
+    group: "{{ ci_runner_user }}"
+    home: "{{ ci_runner_dir }}"
+    shell: /bin/bash
+    system: true
+  become: true
+
+- name: Ensure runner directory exists
+  ansible.builtin.file:
+    path: "{{ ci_runner_dir }}"
+    state: directory
+    owner: "{{ ci_runner_user }}"
+    group: "{{ ci_runner_user }}"
+    mode: '0755'
+  become: true
+
+- name: Download GitHub Actions runner package
+  ansible.builtin.get_url:
+    url: "https://github.com/actions/runner/releases/download/v{{ ci_runner_version }}/actions-runner-linux-x64-{{ ci_runner_version }}.tar.gz"
+    dest: "/tmp/actions-runner-linux-x64-{{ ci_runner_version }}.tar.gz"
+    mode: '0644'
+  become: true
+
+- name: Extract runner package
+  ansible.builtin.unarchive:
+    src: "/tmp/actions-runner-linux-x64-{{ ci_runner_version }}.tar.gz"
+    dest: "{{ ci_runner_dir }}"
+    remote_src: true
+    owner: "{{ ci_runner_user }}"
+    group: "{{ ci_runner_user }}"
+    creates: "{{ ci_runner_dir }}/config.sh"
+  become: true
+
+- name: Install runner dependencies
+  ansible.builtin.command:
+    cmd: "{{ ci_runner_dir }}/bin/installdependencies.sh"
+  args:
+    creates: /etc/systemd/system/actions.runner.*
+  become: true
