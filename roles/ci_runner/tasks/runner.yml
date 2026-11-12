@@ -47,6 +47,12 @@
     creates: /etc/systemd/system/actions.runner.*
   become: true
 
+- name: Check if runner is already configured
+  ansible.builtin.stat:
+    path: "{{ ci_runner_dir }}/.runner"
+  register: runner_configured
+  become: true
+
 - name: Configure runner registration
   ansible.builtin.shell: |
     runuser -u {{ ci_runner_user }} -- ./config.sh --unattended \
@@ -57,7 +63,7 @@
       --replace
   args:
     chdir: "{{ ci_runner_dir }}"
-    creates: "{{ ci_runner_dir }}/.runner"
+  when: not runner_configured.stat.exists
   become: true
 
 - name: Install runner system service
