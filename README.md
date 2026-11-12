@@ -24,6 +24,7 @@ runner-standard/
 │       ├── tools.yml               # HashiCorp Vault & GitHub CLI (signed keyrings)
 │       ├── runner.yml              # Dedicated runner user, v2.338.2 setup & systemd service
 │       └── verify.yml              # Automated binary & version assertions
+├── README.md
 ├── ansible.cfg
 ├── inventory.ini
 ├── Makefile
