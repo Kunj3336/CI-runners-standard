@@ -1,0 +1,36 @@
+name: Runner Self-Check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/runner-self-check.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-environment:
+    runs-on: [self-hosted, linux, intern-lab]
+    steps:
+      - name: Check System & Core Utilities
+        run: |
+          echo "=== OS & User ==="
+          uname -a
+          whoami
+          echo "=== Core Binaries ==="
+          jq --version
+          unzip -v | head -n 1
+          git --version
+          make --version | head -n 1
+
+      - name: Check Languages & Runtimes
+        run: |
+          echo "=== Python & Node ==="
+          python3.12 --version
+          pip3 --version
+          node --version
+          npm --version
+
+      - name: Check Cloud & Security CLIs
+        run: |
+          echo "=== Vault & GitHub CLI ==="
+          vault version
+          gh --version
