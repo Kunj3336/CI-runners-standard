@@ -1,24 +1,22 @@
-# Standard Self-Hosted CI Runner Tools
+# Approved Self-Hosted Runner Toolchain
 
-## Objective
-Establish a single source of truth for all software packages installed on self-hosted GitHub Actions runners within the intern organization to ensure consistent CI execution and prevent environment drift.
+This document defines the standardized software baseline enforced across all self-hosted Linux GitHub Actions runners via the `ci_runner` Ansible role.
 
-## Standard Tool Inventory
+## Toolchain Matrix
 
-| Tool | Proposed Version | Installation Method | Purpose in CI Pipelines |
-| :--- | :--- | :--- | :--- |
-| **Python 3** | `3.12.x` (Distro default) | `apt` (`python3.12`) | Script execution, testing frameworks, and tooling |
-| **pip & venv** | Distro default | `apt` (`python3-pip`, `python3-venv`) | Dependency management and isolated virtual environments |
-| **Node.js** | `22.x LTS` | NodeSource APT repository | JavaScript/TypeScript builds, linting, frontend actions |
-| **npm** | Bundled with Node 22 | NodeSource package | Package manager for Node dependencies |
-| **jq** | Distro default | `apt` | Parsing JSON outputs from API queries and CLI tools |
-| **unzip / zip** | Distro default | `apt` | Packaging and extracting build artifacts and archives |
-| **Vault** | `1.18.x` | HashiCorp APT repository | Pulling secrets during automated test and deploy stages |
-| **Git** | Distro default | `apt` | Repository checkout, tagging, and branch operations |
-| **cURL / wget** | Distro default | `apt` | Downloading remote assets, payloads, and endpoint health checks |
-| **GitHub CLI (`gh`)**| Latest stable | GitHub official APT repository | CI PR automation, release drafting, and GitHub API queries |
-| **build-essential** | Distro default | `apt` | Compiling native binaries and C extensions |
-| **make** | Distro default | `apt` | Standard build and automation entry points |
+| Tool / Package | Binary | Minimum / Target Standard | Installation Source | Purpose |
+| :--- | :--- | :--- | :--- | :--- |
+| **jq** | `jq` | `1.7+` | Ubuntu APT (`main`) | JSON parsing in CI scripts and API responses |
+| **Unzip** | `unzip` | `6.00+` | Ubuntu APT (`main`) | Artifact and archive extraction |
+| **Git** | `git` | `2.43+` | Ubuntu APT (`main`) | Source checkout and repository operations |
+| **Python** | `python3.12` | `3.12.x` | Ubuntu APT (`main`) | Automation scripts, linters, and Python builds |
+| **Pip** | `pip3` | `24.0+` | Ubuntu APT (`python3-pip`) | Python dependency management |
+| **Node.js** | `node` | `v22.x` LTS | NodeSource Official Repo | JavaScript/TypeScript builds and tooling |
+| **npm** | `npm` | `10.x+` | Bundled with Node.js 22 | Node package installation and scripts |
+| **HashiCorp Vault** | `vault` | Latest Stable | HashiCorp Official APT Repo | Secret retrieval and dynamic credentials in CI |
+| **GitHub CLI** | `gh` | `2.103.3+` | GitHub Official APT Repo | PR automation, workflow triggers, and releases |
+| **Actions Runner** | `Runner.Listener` | `v2.338.2` | GitHub Actions Releases | Self-hosted CI job execution agent |
 
-## Exclusions & Constraints
-- **Docker:** Excluded from base runner footprint to conserve compute resources on lightweight VMs (2 GB RAM, 2 vCPU). Workflows requiring container builds will be evaluated separately.
+## Security & Repository Standards
+* **No Deprecated `apt-key`:** All third-party GPG keys are stored as binary `.gpg` keyrings under `/etc/apt/keyrings/` and scoped via `signed-by=` in `/etc/apt/sources.list.d/`.
+* **Least-Privilege Execution:** CI jobs execute under the dedicated non-root system user `runner` (`/opt/actions-runner`), never as `root`.
