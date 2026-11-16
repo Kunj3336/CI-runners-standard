@@ -1,0 +1,50 @@
+name: Runner Self-Check
+
+on:
+  push:
+    paths:
+      - '.github/workflows/runner-self-check.yml'
+  workflow_dispatch:
+
+jobs:
+  verify-environment:
+    runs-on: [self-hosted, linux, intern-lab]
+    steps:
+      - name: Check Runner Host & User Isolation
+        run: |
+          echo "Host: $(hostname) | OS: $(uname -sr) | User: $(whoami)"
+          if [ "$(whoami)" = "root" ]; then
+            echo "::error::Runner must not execute jobs as root!"
+            exit 1
+          fi
+
+      - name: Verify All Standardized Tools
+        run: |
+          MISSING=0
+
+          check_tool() {
+            local name="$1"
+            local cmd="$2"
+            if ! command -v "$name" >/dev/null 2>&1; then
+              echo "::error::MISSING TOOL: '$name' is not installed or not in PATH!"
+              MISSING=1
+            else
+              echo "[OK] $name -> $(eval "$cmd" 2>&1 | head -n 1)"
+            fi
+          }
+
+          check_tool "jq" "jq --version"
+          check_tool "unzip" "unzip -v"
+          check_tool "git" "git --version"
+          check_tool "make" "make --version"
+          check_tool "python3.12" "python3.12 --version"
+          check_tool "pip3" "pip3 --version"
+          check_tool "node" "node --version"
+          check_tool "npm" "npm --version"
+          check_tool "vault" "vault version"
+          check_tool "gh" "gh --version"
+
+          if [ "$MISSING" -ne 0 ]; then
+            echo "::error::One or more standardized runner tools are missing. Re-run the ci_runner Ansible role."
+            exit 1
+          fi

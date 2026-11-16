@@ -10,27 +10,41 @@ jobs:
   verify-environment:
     runs-on: [self-hosted, linux, intern-lab]
     steps:
-      - name: Check System & Core Utilities
+      - name: Check Runner Host & User Isolation
         run: |
-          echo "=== OS & User ==="
-          uname -a
-          whoami
-          echo "=== Core Binaries ==="
-          jq --version
-          unzip -v | head -n 1
-          git --version
-          make --version | head -n 1
+          echo "Host: $(hostname) | OS: $(uname -sr) | User: $(whoami)"
+          if [ "$(whoami)" = "root" ]; then
+            echo "::error::Runner must not execute jobs as root!"
+            exit 1
+          fi
 
-      - name: Check Languages & Runtimes
+      - name: Verify All Standardized Tools
         run: |
-          echo "=== Python & Node ==="
-          python3.12 --version
-          pip3 --version
-          node --version
-          npm --version
+          MISSING=0
 
-      - name: Check Cloud & Security CLIs
-        run: |
-          echo "=== Vault & GitHub CLI ==="
-          vault version
-          gh --version
+          check_tool() {
+            local name="$1"
+            local cmd="$2"
+            if ! command -v "$name" >/dev/null 2>&1; then
+              echo "::error::MISSING TOOL: '$name' is not installed or not in PATH!"
+              MISSING=1
+            else
+              echo "[OK] $name -> $(eval "$cmd" 2>&1 | head -n 1)"
+            fi
+          }
+
+          check_tool "jq" "jq --version"
+          check_tool "unzip" "unzip -v"
+          check_tool "git" "git --version"
+          check_tool "make" "make --version"
+          check_tool "python3.12" "python3.12 --version"
+          check_tool "pip3" "pip3 --version"
+          check_tool "node" "node --version"
+          check_tool "npm" "npm --version"
+          check_tool "vault" "vault version"
+          check_tool "gh" "gh --version"
+
+          if [ "$MISSING" -ne 0 ]; then
+            echo "::error::One or more standardized runner tools are missing. Re-run the ci_runner Ansible role."
+            exit 1
+          fi

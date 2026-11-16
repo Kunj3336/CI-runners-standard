@@ -9,12 +9,13 @@
 - name: Run NodeSource setup script
   ansible.builtin.command: /tmp/nodesource_setup.sh
   args:
-    creates: /etc/apt/sources.list.d/nodesource.list
+    creates: /etc/apt/sources.list.d/nodesource.sources
   become: true
 
-- name: Install Node.js
+- name: Install pinned Node.js
   ansible.builtin.apt:
-    name: nodejs
+    name: "nodejs={{ ci_node_version }}"
     state: present
+    allow_downgrade: true
     update_cache: true
   become: true

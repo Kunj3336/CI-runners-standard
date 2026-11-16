@@ -18,10 +18,12 @@ ci_python_packages:
   - python3-venv
 
 ci_node_major: "22"
-ci_vault_version: "1.18.0"
+ci_node_version: "22.23.5-1nodesource1"
+ci_vault_version: "2.2.2"
+ci_gh_version: "2.103.3"
 
 ci_runner_user: "runner"
 ci_runner_dir: "/opt/actions-runner"
 ci_runner_version: "2.338.2"
 ci_runner_labels: "self-hosted,linux,intern-lab"
-ci_runner_url: "https://github.com/Kunj3336/CI-runners-standard"
+ci_runner_url: "https://github.com/REPLACE_WITH_INTERN_ORG"

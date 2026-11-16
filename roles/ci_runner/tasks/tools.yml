@@ -35,11 +35,12 @@
     filename: github-cli
   become: true
 
-- name: Install Vault and GitHub CLI
+- name: Install pinned HashiCorp Vault and GitHub CLI
   ansible.builtin.apt:
     name:
-      - vault
-      - gh
+      - "vault={{ ci_vault_version }}-1"
+      - "gh={{ ci_gh_version }}"
     state: present
+    allow_downgrade: true
     update_cache: true
   become: true
