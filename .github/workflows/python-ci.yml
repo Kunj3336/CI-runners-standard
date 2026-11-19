@@ -1,0 +1,14 @@
+name: python-ci
+
+on: [push, workflow_dispatch]
+
+jobs:
+  test:
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3.12 --version
+      - run: python3.12 -m venv .venv
+      - run: .venv/bin/pip install -r requirements.txt
+      - run: .venv/bin/python -m pytest -q
+      - run: make lint

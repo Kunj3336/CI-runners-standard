@@ -63,7 +63,10 @@
       --replace
   args:
     chdir: "{{ ci_runner_dir }}"
-  when: not runner_configured.stat.exists
+  when:
+    - not runner_configured.stat.exists
+    - runner_token is defined
+    - runner_token | length > 0
   become: true
 
 - name: Install runner system service
@@ -72,11 +75,24 @@
     chdir: "{{ ci_runner_dir }}"
   args:
     creates: /etc/systemd/system/actions.runner.*
+  when: runner_configured.stat.exists or (runner_token is defined and runner_token | length > 0)
+  become: true
+
+- name: Check runner system service status
+  ansible.builtin.command:
+    cmd: ./svc.sh status
+    chdir: "{{ ci_runner_dir }}"
+  register: runner_svc_status
+  changed_when: false
+  failed_when: false
+  when: runner_configured.stat.exists or (runner_token is defined and runner_token | length > 0)
   become: true
 
 - name: Start runner system service
   ansible.builtin.command:
     cmd: ./svc.sh start
     chdir: "{{ ci_runner_dir }}"
+  when:
+    - runner_configured.stat.exists or (runner_token is defined and runner_token | length > 0)
+    - "'active (running)' not in runner_svc_status.stdout"
   become: true
-  ignore_errors: true

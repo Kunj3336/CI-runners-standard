@@ -1,0 +1,9 @@
+{
+  "name": "ci-runner-test-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "mkdir -p dist && echo 'console.log(\"ok\");' > dist/index.js",
+    "test": "node -e \"console.log('Node tests passed')\""
+  }
+}

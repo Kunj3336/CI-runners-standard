@@ -18,33 +18,44 @@ jobs:
             exit 1
           fi
 
-      - name: Verify All Standardized Tools
+      - name: Verify All Standardized Tools & Pinned Versions
         run: |
-          MISSING=0
+          FAILED=0
 
           check_tool() {
             local name="$1"
             local cmd="$2"
+            local expected="$3"
+
             if ! command -v "$name" >/dev/null 2>&1; then
               echo "::error::MISSING TOOL: '$name' is not installed or not in PATH!"
-              MISSING=1
+              FAILED=1
+              return
+            fi
+
+            local output
+            output=$(eval "$cmd" 2>&1 | head -n 1)
+
+            if [ -n "$expected" ] && ! echo "$output" | grep -qF "$expected"; then
+              echo "::error::VERSION MISMATCH for '$name': expected '$expected', got '$output'"
+              FAILED=1
             else
-              echo "[OK] $name -> $(eval "$cmd" 2>&1 | head -n 1)"
+              echo "[OK] $name -> $output"
             fi
           }
 
-          check_tool "jq" "jq --version"
-          check_tool "unzip" "unzip -v"
-          check_tool "git" "git --version"
-          check_tool "make" "make --version"
-          check_tool "python3.12" "python3.12 --version"
-          check_tool "pip3" "pip3 --version"
-          check_tool "node" "node --version"
-          check_tool "npm" "npm --version"
-          check_tool "vault" "vault version"
-          check_tool "gh" "gh --version"
+          check_tool "jq" "jq --version" ""
+          check_tool "unzip" "unzip -v" ""
+          check_tool "git" "git --version" ""
+          check_tool "make" "make --version" ""
+          check_tool "python3.12" "python3.12 --version" "3.12"
+          check_tool "pip3" "pip3 --version" ""
+          check_tool "node" "node --version" "v22.23.5"
+          check_tool "npm" "npm --version" ""
+          check_tool "vault" "vault version" "2.2.2"
+          check_tool "gh" "gh --version" "2.103.3"
 
-          if [ "$MISSING" -ne 0 ]; then
-            echo "::error::One or more standardized runner tools are missing. Re-run the ci_runner Ansible role."
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Environment verification failed. Re-run the ci_runner Ansible role."
             exit 1
           fi
